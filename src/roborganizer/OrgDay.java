@@ -20,6 +20,7 @@ public class OrgDay {
     private static final char DURATION_SIGN = '-';
     private static final char DURATION_SHORT = '.';
     private static final char IMPORTANT_SIGN = '!';
+    private static final String NUMBER_STRING = "Num";
     private static final String FROM_STRING = "From";
     private static final String TO_STRING = "To";
     private static final String TASK_STRING = "Task";
@@ -34,6 +35,7 @@ public class OrgDay {
     // fields for output table length calculation
     private int fromLength = 7;
     private int toLength = 7;
+    private int numberLength = NUMBER_STRING.length() + 2;
     private int taskLength = TASK_STRING.length() + 2;
     private int valLength = VALUE_STRING.length() + 2;
     private int statusLength = STATUS_STRING.length() + 2;
@@ -136,6 +138,7 @@ public class OrgDay {
     }
 
     private void calculateLengths() {
+        int counter = 1;
         for (OrgEvent event : events) {
             if (event.getMessage().length() + 2 > this.taskLength) {
                 this.taskLength = event.getMessage().length() + 2;
@@ -148,6 +151,12 @@ public class OrgDay {
             if (dur > this.durationLength) {
                 this.durationLength = dur;
             }
+            int counterLen = Integer.toString(counter).length();
+            if(counterLen > this.numberLength) {
+                this.numberLength = counterLen;
+            }
+            counter++;
+
         }
         this.isLengthCalculated = true;
     }
@@ -159,8 +168,9 @@ public class OrgDay {
         if (!this.isLengthCalculated) {
             calculateLengths();
         }
-        return 7 + this.fromLength + this.toLength + this.taskLength +
-                this.valLength + this.statusLength + this.durationLength;
+        return 8 + this.fromLength + this.toLength + this.taskLength +
+                this.valLength + this.statusLength + this.durationLength +
+                this.numberLength;
     }
 
     public String toTable() {
@@ -176,14 +186,17 @@ public class OrgDay {
         StringBuilder res = new StringBuilder();
         res.append(getTableHeader());
         res.append(getSecondLine());
+        int i = 1;
         for (OrgEvent event : events) {
-            res.append(getTableLine(event));
+            res.append(getTableLine(event, i++));
         }
         return res.toString();
     }
 
     private String getTableHeader() {
         StringBuilder res = new StringBuilder();
+        res.append(TABLE_VERTICAL_DELIM);
+        res.append(OrgHelpers.centerString(NUMBER_STRING, numberLength));
         res.append(TABLE_VERTICAL_DELIM);
         res.append(OrgHelpers.centerString(FROM_STRING, this.fromLength));
         res.append(TABLE_VERTICAL_DELIM);
@@ -203,6 +216,10 @@ public class OrgDay {
 
     private String getSecondLine() {
         StringBuilder res = new StringBuilder();
+        res.append(TABLE_VERTICAL_DELIM);
+        for (int i = 0; i < this.numberLength; i++) {
+            res.append(TABLE_HORIZONTAL_DELIM);
+        }
         res.append(TABLE_VERTICAL_DELIM);
         for (int i = 0; i < this.fromLength; i++) {
             res.append(TABLE_HORIZONTAL_DELIM);
@@ -232,8 +249,10 @@ public class OrgDay {
         return res.toString();
     }
 
-    private String getTableLine(OrgEvent event) {
+    private String getTableLine(OrgEvent event, int number) {
         StringBuilder res = new StringBuilder();
+        res.append(TABLE_VERTICAL_DELIM);
+        res.append(OrgHelpers.centerString(Integer.toString(number), numberLength));
         res.append(TABLE_VERTICAL_DELIM);
         res.append(' ');
         res.append(getPrettyDate(event.getFrom()));
@@ -348,35 +367,5 @@ public class OrgDay {
         public int getTotalDurationMinutes() {
             return totalDurationMinutes;
         }
-    }
-
-    public static void main(String[] args) {    //TODO: remove
-        OrgDay day = new OrgDay();
-        OrgEvent work = new OrgEvent("Go to work",
-                new GregorianCalendar(2016, 8, 25, 8, 0),
-                new GregorianCalendar(2016, 8, 25, 13, 30),
-                false, 1000);
-        OrgEvent shower = new OrgEvent("Take a shower",
-                new GregorianCalendar(2016, 8, 25, 7, 30),
-                new GregorianCalendar(2016, 8, 25, 7, 45),
-                false, 100);
-        OrgEvent rebellion = new OrgEvent("Watch Madoka:Rebellion",
-                new GregorianCalendar(2016, 8, 25, 19, 0),
-                new GregorianCalendar(2016, 8, 25, 21, 30),
-                false, 400);
-        OrgEvent debug = new OrgEvent("Debug Roborganizer",
-                new GregorianCalendar(2016, 8, 25, 22, 0),
-                new GregorianCalendar(2016, 8, 25, 23, 30),
-                true, 5000);
-        day.addEvent(work);
-        day.addEvent(shower);
-        day.addEvent(rebellion);
-        day.addEvent(debug);
-        day.sortEventsByTime();
-        System.out.println(day); //TODO: remove
-        System.out.println(); //TODO: remove
-        day.sortEventsByValue();
-        System.out.println(day); //TODO: remove
-        System.out.println(work.getEventStatus()); //TODO: remove
     }
 }

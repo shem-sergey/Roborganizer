@@ -3,7 +3,6 @@ package roborganizer;
 import roborganizer.datePatterns.*;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Calendar;
@@ -352,17 +351,10 @@ public class OrgCalendar {
         day.addEvent(rebellion);
         day.addEvent(debug);
         day.sortEventsByTime();
+        System.out.println(day.toTable());
         OrgCalendar calendar = new OrgCalendar();
         calendar.addDay(new GregorianCalendar(2016, 7, 25), day);
         calendar.printOrgDay(new GregorianCalendar(2016, 7, 25));
         calendar.printOrgDay(new GregorianCalendar(2016, 7, 26));
-        FileOutputStream fileOutputStream = new FileOutputStream("test.txt");
-        PrintStream ps = new PrintStream(fileOutputStream);
-        serialize(ps, calendar);
-        ps.close();
-        fileOutputStream.close();
-        FileInputStream stream = new FileInputStream("test.txt");
-        OrgCalendar cal = OrgCalendar.deserialize(stream);
-        cal.printOrgDay(new GregorianCalendar(2016, 7, 25));
     }
 }

@@ -1,5 +1,6 @@
 package roborganizer.cli;
 
+import roborganizer.OrgEvent;
 import roborganizer.OrgScanner;
 import roborganizer.datePatterns.*;
 

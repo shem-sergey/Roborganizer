@@ -71,9 +71,4 @@ public class Serializer {
         }
         return true;
     }
-
-    public static void main(String[] args) {     // TODO: remove
-        readFromFile();
-    }
-
 }

@@ -62,6 +62,9 @@ public class Roborganizer {
             case ADD_PATTERNED_EVENT:
                 addPatternedDay(orgCalendar);
                 break;
+            case UPDATE_STATUS:
+                //TODO
+                break;
             default:
                 System.out.println("Sorry, this functionality is not added yet.");
         }
