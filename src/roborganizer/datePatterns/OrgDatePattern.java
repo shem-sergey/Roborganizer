@@ -9,14 +9,23 @@ import java.util.GregorianCalendar;
  * <p>
  * Created by robaut on 8/23/16.
  */
-public interface OrgDatePattern {
+public abstract class OrgDatePattern {
 
-    boolean contains(GregorianCalendar date);
+    public static final String PATTERN_STRING = "pattern";
+    public static final String[] PATTERNS = {"DAYOFMONTH", "DAYOFWEEK",
+            "DAYSOFMONTH", "DAYSOFWEEK", "WEEKDAY", "WEEKEND"};
 
-    String PATTERN_STRING = "pattern";
+    protected GregorianCalendar lastUpdate;
 
-    String[] PATTERNS = {"DAYOFMONTH", "DAYOFWEEK", "DAYSOFMONTH", "DAYSOFWEEK",
-    "WEEKDAY", "WEEKEND"};
+    public abstract boolean contains(GregorianCalendar date);
 
-    void serialzie(PrintStream stream);
+    public abstract void serialzie(PrintStream stream);
+
+    public GregorianCalendar getDateOfLastUpdate() {
+        return this.lastUpdate;
+    }
+
+    public void setLastUpdate(GregorianCalendar lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
 }

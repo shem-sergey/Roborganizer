@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import static roborganizer.OrgHelpers.getDateDescription;
 import static roborganizer.cli.Readers.*;
 
 /**
@@ -60,7 +61,7 @@ public class Roborganizer {
                 addSinglEvent(orgCalendar);
                 break;
             case ADD_PATTERNED_EVENT:
-                addPatternedDay(orgCalendar);
+                addPatternedEvent(orgCalendar);
                 break;
             case UPDATE_STATUS:
                 //TODO
@@ -89,7 +90,7 @@ public class Roborganizer {
                 from, to, isImportant, value));
     }
 
-    static void addPatternedDay(OrgCalendar orgCalendar) {
+    static void addPatternedEvent(OrgCalendar orgCalendar) {
         System.out.println("Enter pattern:");
         OrgDatePattern pattern = readPattern();
         GregorianCalendar date = new GregorianCalendar();
@@ -102,13 +103,12 @@ public class Roborganizer {
         boolean isImportant = readIsImportant();
         System.out.println("Enter task value:");
         int value = readInteger();
-        orgCalendar.addSingleEvent(date, new OrgEvent(message,
+        orgCalendar.addPattern(pattern, new OrgEvent(message,
                 from, to, isImportant, value));
     }
 
     static boolean confirmDate(GregorianCalendar calendar) {
-        System.out.println("Is this correct: " +
-                OrgCalendar.getDateDescription(calendar) + "?");
+        System.out.println("Is this correct: " + getDateDescription(calendar) + "?");
         return getAnswer();
     }
 

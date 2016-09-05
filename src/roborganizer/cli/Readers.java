@@ -299,20 +299,20 @@ public class Readers {
             switch (pattern) {
                 case DatePatternDayOfMonth.SERIALIZE_STRING:
                     System.out.println("Enter day of month:");
-                    return new DatePatternDayOfMonth(readInteger());
+                    return new DatePatternDayOfMonth(readInteger(), new GregorianCalendar());
                 case DatePatternDayOfWeek.SERIALIZE_STRING:
                     System.out.println("Enter day of week:");
-                    return new DatePatternDayOfWeek(readDayOfWeek());
+                    return new DatePatternDayOfWeek(readDayOfWeek(), new GregorianCalendar());
                 case DatePatternSeveralDaysOfMonth.SERIALIZE_STRING:
                     System.out.println("Enter days of month:");
-                    return new DatePatternSeveralDaysOfMonth(readDays());
+                    return new DatePatternSeveralDaysOfMonth(readDays(), new GregorianCalendar());
                 case DatePatternSeveralDaysOfWeek.SERIALIZE_STRING:
                     System.out.println("Enter days of week:");
-                    return new DatePatternSeveralDaysOfWeek(readDaysOfWeek());
+                    return new DatePatternSeveralDaysOfWeek(readDaysOfWeek(), new GregorianCalendar());
                 case DatePatternWeekday.SERIALIZE_STRING:
-                    return new DatePatternWeekday();
+                    return new DatePatternWeekday(new GregorianCalendar());
                 case DatePatternWeekend.SERIALIZE_STRING:
-                    return new DatePatternWeekend();
+                    return new DatePatternWeekend(new GregorianCalendar());
                 default:
                     throw new IOException("Can't read date pattern.");
             }

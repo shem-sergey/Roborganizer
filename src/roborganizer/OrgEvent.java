@@ -16,6 +16,7 @@ public class OrgEvent implements Comparable<OrgEvent> {
     private boolean isImportant;
     private int value;
     private OrgHelpers.EventStatus eventStatus;
+
     // True if two events should be compared by starting time. If it is false, they are compared by value
     private boolean compareByTime;
 
@@ -38,6 +39,16 @@ public class OrgEvent implements Comparable<OrgEvent> {
         this.isImportant = isImportant;
         this.value = value;
         this.eventStatus = eventStatus;
+    }
+
+    public OrgEvent(OrgEvent another) {
+        this.message = another.message;
+        this.from = OrgHelpers.copyTime(another.from);
+        this.to = OrgHelpers.copyTime(another.to);
+        this.isImportant = another.isImportant;
+        this.value = another.value;
+        this.eventStatus = another.eventStatus;
+        this.compareByTime = another.compareByTime;
     }
 
     public String getMessage() {
@@ -86,12 +97,12 @@ public class OrgEvent implements Comparable<OrgEvent> {
     }
 
     public static void serialize(PrintStream stream, OrgEvent event) {
-        stream.println(event.message);
-        stream.println(serializeHourMinutes(event.from));
-        stream.println(serializeHourMinutes(event.to));
-        stream.println(event.isImportant);
-        stream.println(Integer.toString(event.value));
-        stream.println(event.eventStatus);
+            stream.println(event.message);
+            stream.println(serializeHourMinutes(event.from));
+            stream.println(serializeHourMinutes(event.to));
+            stream.println(event.isImportant);
+            stream.println(Integer.toString(event.value));
+            stream.println(event.eventStatus);
     }
 
     public static OrgEvent deserialize(FileInputStream stream) throws IOException {

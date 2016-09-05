@@ -50,6 +50,18 @@ public class OrgDay {
     }
 
     /**
+     * Constructor that copies OrgDay.
+     *
+     * @param another is OrgDay to copy.
+     */
+    public OrgDay(OrgDay another) {
+        this.events = new LinkedList<>();
+        for (OrgEvent event : another.events) {
+            this.events.add(new OrgEvent(event));
+        }
+    }
+
+    /**
      * @return true if at least one of events in this organizer day is
      * important.
      */
@@ -124,7 +136,7 @@ public class OrgDay {
         if (one == null) {
             return other;
         }
-        if(other == null) {
+        if (other == null) {
             return one;
         }
         OrgDay res = new OrgDay();
@@ -152,7 +164,7 @@ public class OrgDay {
                 this.durationLength = dur;
             }
             int counterLen = Integer.toString(counter).length();
-            if(counterLen > this.numberLength) {
+            if (counterLen > this.numberLength) {
                 this.numberLength = counterLen;
             }
             counter++;
@@ -330,7 +342,7 @@ public class OrgDay {
 
     public static void serialize(PrintStream stream, OrgDay day) throws IOException {
         stream.println(day.events.size());
-        for(OrgEvent event : day.events) {
+        for (OrgEvent event : day.events) {
             OrgEvent.serialize(stream, event);
         }
     }
@@ -339,7 +351,7 @@ public class OrgDay {
         OrgScanner orgScanner = new OrgScanner(stream);
         OrgDay res = new OrgDay();
         int eventAmount = orgScanner.nextInt();
-        for(int i = 0; i < eventAmount; ++i) {
+        for (int i = 0; i < eventAmount; ++i) {
             res.addEvent(OrgEvent.deserialize(stream));
         }
         return res;

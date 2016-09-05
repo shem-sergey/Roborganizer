@@ -1,5 +1,6 @@
 package roborganizer.datePatterns;
 
+import roborganizer.OrgHelpers;
 import roborganizer.OrgScanner;
 
 import java.io.FileInputStream;
@@ -14,13 +15,14 @@ import java.util.GregorianCalendar;
  * <p>
  * Created by robaut on 8/23/16.
  */
-public class DatePatternSeveralDaysOfWeek implements OrgDatePattern {
+public class DatePatternSeveralDaysOfWeek extends OrgDatePattern {
 
     private int[] daysOfWeek;
     public static final String SERIALIZE_STRING = "DAYSOFWEEK";
 
-    public DatePatternSeveralDaysOfWeek(int[] daysOfWeek) {
+    public DatePatternSeveralDaysOfWeek(int[] daysOfWeek, GregorianCalendar addingDate) {
         this.daysOfWeek = daysOfWeek;
+        this.lastUpdate = addingDate;
     }
 
     public DatePatternSeveralDaysOfWeek(FileInputStream stream) throws IOException {
@@ -29,6 +31,8 @@ public class DatePatternSeveralDaysOfWeek implements OrgDatePattern {
         for (int i = 0; i < daysOfWeek.length; ++i) {
             daysOfWeek[i] = scanner.nextInt();
         }
+        this.lastUpdate = new GregorianCalendar(scanner.nextInt(),
+                scanner.nextInt(), scanner.nextInt());
     }
 
     @Override
@@ -60,5 +64,6 @@ public class DatePatternSeveralDaysOfWeek implements OrgDatePattern {
         for (int day : daysOfWeek) {
             stream.println(day);
         }
+        stream.println(OrgHelpers.serializeDate(lastUpdate));
     }
 }
