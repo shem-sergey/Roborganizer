@@ -1,7 +1,6 @@
 package roborganizer.cli;
 
-import roborganizer.OrgEvent;
-import roborganizer.OrgScanner;
+import roborganizer.*;
 import roborganizer.datePatterns.*;
 
 import java.io.IOException;
@@ -36,8 +35,9 @@ public class Readers {
                 int month = 0;
                 int year = 0;
                 String[] split = input.split(" ");
-                if (split.length == 0) {
-                    GregorianCalendar res = new GregorianCalendar();
+                if (split.length == 1 && split[0].isEmpty()) {
+                    GregorianCalendar res = OrgHelpers.normalize(
+                            new GregorianCalendar());
                     if (!confirmDate(res)) {
                         return readDate();
                     }
@@ -318,6 +318,74 @@ public class Readers {
             }
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public static OrgEvent readOrgEvent(OrgCalendar orgCalendar) {
+        System.out.println("Enter date of event to update:");
+        GregorianCalendar date = readDate();
+        while (date == null) {
+            date = readDate();
+        }
+        orgCalendar.printOrgDay(date);
+        System.out.println("Choose event by number:");
+        int eventNum = readInteger();
+        OrgDay day = orgCalendar.getOrgDay(date);
+        if(day.getEvents().size() > eventNum) {
+            System.out.println("Sorry, try again");
+            return readOrgEvent(orgCalendar);
+        } else {
+            return day.getEvents().get(eventNum - 1);
+        }
+    }
+
+    public static OrgHelpers.EventStatus readEventStatus() {
+        System.out.println("Enter status of event:");
+        OrgScanner scanner = new OrgScanner(System.in);
+        try {
+            String input = scanner.nextLine();
+            input = input.replaceAll(" ", "");
+            input = input.toLowerCase();
+            if(input.length() == 0) {
+                return OrgHelpers.EventStatus.DONE;
+            }
+            switch (input.toLowerCase()) {
+                case "d":
+                case "done":
+                case "finished":
+                case "fin":
+                    return OrgHelpers.EventStatus.DONE;
+                case "f":
+                case "failed":
+                    return OrgHelpers.EventStatus.FAILED;
+                case "a":
+                case "assigned":
+                case "in progress":
+                    return OrgHelpers.EventStatus.ASSIGNED;
+                default:
+                    System.out.println("Sorry, try again:");
+                    return readEventStatus();
+            }
+        } catch (IOException e) {
+            System.out.println("Something went wrong in readEventStatus()");
+            return OrgHelpers.EventStatus.ERROR;
+        }
+    }
+
+    public static OrgTask readTask() {
+        System.out.println("(Enter \"e\" or \"exit\" to exit)");
+        OrgScanner scanner = new OrgScanner(System.in);
+        try {
+            String input = scanner.nextLine();
+            input = input.replaceAll(" ", "");
+            input = input.toLowerCase();
+            if(input.length() == 0) {
+                return OrgTask.EXIT;
+            }
+            return OrgTask.getTask(input.toLowerCase());
+        } catch (IOException e) {
+            System.out.println("Something went wrong in readTask()");
+            return OrgTask.ERROR;
         }
     }
 }

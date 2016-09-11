@@ -22,6 +22,7 @@ import static roborganizer.OrgHelpers.serializeDate;
 public class OrgCalendar {
     private Map<GregorianCalendar, OrgDay> singleDays;
     private Map<OrgDatePattern, OrgEvent> patterns;
+    private GregorianCalendar firstDayInCalendar;   // chronologically first day
     private static final int SHORT_CALENDAR_WIDTH = 27;
 
     /**
@@ -37,7 +38,7 @@ public class OrgCalendar {
      * date (so it contains time 00:00 of particular day) and checks if there
      * are OrgEvent at this date already. In this case two OrgDays are merged.
      *
-     * @param date is date that represents calendar day.
+     * @param date   is date that represents calendar day.
      * @param orgDay is OrgDay that contains particular events.
      */
     public void addDay(GregorianCalendar date, OrgDay orgDay) {
@@ -46,6 +47,7 @@ public class OrgCalendar {
                 date.get(Calendar.MONTH),
                 date.get(Calendar.DAY_OF_MONTH)
         );
+        updateFirstDay(normalized);
         OrgDay day = this.singleDays.get(date);
         if (day == null) {
             this.singleDays.put(normalized, orgDay);
@@ -71,24 +73,26 @@ public class OrgCalendar {
      * update date) and puts regular OrgEvents into days, matching the pattern.
      * Current date is memorized as date of last update for this pattern.
      *
-     * @param pattern is OrgDayPattern for event.
+     * @param pattern  is OrgDayPattern for event.
      * @param orgEvent is some OrgEvent to be associated with pattern.
      */
     public void addPattern(OrgDatePattern pattern, OrgEvent orgEvent) {
         if (pattern != null) {
             this.patterns.put(pattern, orgEvent);
         }
-        GregorianCalendar now = new GregorianCalendar();
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-        }
+        GregorianCalendar today = OrgHelpers.normalize(new GregorianCalendar());
+        updateFirstDay(pattern.getDateOfLastUpdate());
         for (GregorianCalendar calendar = normalize(pattern.getDateOfLastUpdate());
-             calendar.before(now); calendar.add(Calendar.DAY_OF_MONTH, 1)) {
+             calendar.before(today); calendar.add(Calendar.DAY_OF_MONTH, 1)) {
             OrgEvent toAdd = new OrgEvent(orgEvent);
             this.addSingleEvent(OrgHelpers.copyDate(calendar), toAdd);
         }
-        pattern.setLastUpdate(new GregorianCalendar());
+        OrgDay orgDay = this.getOrgDay(today);
+        if(!orgDay.containsOrgEvent(orgEvent)) {
+            orgDay.addEvent(orgEvent);
+            this.singleDays.put(today, orgDay);
+        }
+        pattern.setLastUpdate(today);
     }
 
     /**
@@ -211,7 +215,7 @@ public class OrgCalendar {
      * given calendar day.
      *
      * @param calendar is date for which OrgDay is printed.
-     * @param stream is stream where calendar is being output.
+     * @param stream   is stream where calendar is being output.
      */
     public void printOrgDay(GregorianCalendar calendar, PrintStream stream) {
         GregorianCalendar normalized = new GregorianCalendar(
@@ -253,13 +257,14 @@ public class OrgCalendar {
     /**
      * Method serializes OrgCalendar into stream.
      *
-     * @param stream is stream into which OrgCalendar will be serialized.
+     * @param stream   is stream into which OrgCalendar will be serialized.
      * @param calendar is OrgCalendar to serialize.
      * @throws IOException if stream error occurs.
      */
     public static void serialize(PrintStream stream, OrgCalendar calendar) throws IOException {
         serializeSingles(stream, calendar);
         serializePatterns(stream, calendar);
+        stream.println(OrgHelpers.serializeDate(calendar.firstDayInCalendar));
     }
 
     /**
@@ -273,16 +278,20 @@ public class OrgCalendar {
         OrgCalendar res = new OrgCalendar();
         deserializeSingles(stream, res);
         deserializePatterned(stream, res);
+        OrgScanner scanner = new OrgScanner(stream);
+        res.firstDayInCalendar = new GregorianCalendar(scanner.nextInt(),
+                scanner.nextInt(), scanner.nextInt());
         return res;
     }
 
     /**
      * Adds sigle event to OrgCalendar.
      *
-     * @param date is date that should be associated with given event.
+     * @param date  is date that should be associated with given event.
      * @param event is some OrgEvent.
      */
     public void addSingleEvent(GregorianCalendar date, OrgEvent event) {
+        updateFirstDay(date);
         OrgDay day = this.singleDays.get(normalize(date));
         if (day == null) {
             day = new OrgDay();
@@ -290,6 +299,38 @@ public class OrgCalendar {
             this.addDay(normalize(date), day);
         } else {
             day.addEvent(event);
+        }
+    }
+
+    public void expireEvents() {
+        GregorianCalendar now = new GregorianCalendar();
+        for (GregorianCalendar calendar = normalize(firstDayInCalendar);
+             calendar.before(now); calendar.add(Calendar.DAY_OF_MONTH, 1)) {
+            OrgDay day = this.singleDays.get(calendar);
+            if (day != null) {
+                for (OrgEvent event : day.getEvents()) {
+                    if (event.getEventStatus() == OrgHelpers.EventStatus.ASSIGNED) {
+                        event.setEventStatus(OrgHelpers.EventStatus.FAILED);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets OrgDay for given calendar date.
+     *
+     * @param normalizedDate is normalized date (that means only year, month and
+     *                       day of month are set).
+     * @return OrgDay that corresponds to given date or null if no OrgDay is
+     * present.
+     */
+    public OrgDay getOrgDay(GregorianCalendar normalizedDate) {
+        OrgDay res = this.singleDays.get(normalizedDate);
+        if (res != null) {
+            return res;
+        } else {
+            return new OrgDay();
         }
     }
 
@@ -304,15 +345,6 @@ public class OrgCalendar {
         total += " h ";
         total += Integer.toString(minutes);
         return total + " m";
-    }
-
-    private OrgDay getOrgDay(GregorianCalendar normalizedDate) {
-        OrgDay res = this.singleDays.get(normalizedDate);
-        if (res != null) {
-            return res;
-        } else {
-            return new OrgDay();
-        }
     }
 
     private static void serializeSingles(PrintStream stream,
@@ -375,6 +407,12 @@ public class OrgCalendar {
                 return new DatePatternWeekend(stream);
             default:
                 throw new IOException("Can't read date pattern.");
+        }
+    }
+
+    private void updateFirstDay(GregorianCalendar newDate) {
+        if (newDate.before(firstDayInCalendar) || firstDayInCalendar == null) {
+            firstDayInCalendar = OrgHelpers.copyDate(newDate);
         }
     }
 

@@ -136,4 +136,21 @@ public class OrgEvent implements Comparable<OrgEvent> {
         res += "\n";
         return res + Integer.toString(cal.get(Calendar.MINUTE));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OrgEvent event = (OrgEvent) o;
+
+        if (isImportant != event.isImportant) return false;
+        if (value != event.value) return false;
+        if (message != null ? !message.equals(event.message) : event.message != null)
+            return false;
+        if (from != null ? !from.equals(event.from) : event.from != null)
+            return false;
+        return to != null ? to.equals(event.to) : event.to == null;
+
+    }
 }

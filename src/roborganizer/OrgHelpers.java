@@ -38,7 +38,8 @@ public class OrgHelpers {
     public enum EventStatus {
         ASSIGNED,
         DONE,
-        FAILED;
+        FAILED,
+        ERROR;
 
         public static EventStatus parseEventStatus(String status) throws IOException {
             if(status.charAt(0) == 'A') {

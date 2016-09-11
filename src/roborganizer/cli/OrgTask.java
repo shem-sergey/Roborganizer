@@ -11,7 +11,8 @@ public enum OrgTask {
     UPDATE_STATUS("upd", "updates status of specified event, for example marks event as done"),
     EDIT_EVENT("edt", "edits uncorrectly input event"),
     PRINT_STATISTICS("stat", "prints statistics for specified period"),
-    ERROR("err", "error");
+    ERROR("err", "error"),
+    EXIT("e", "exits program");
 
     private String cliCommand;
     private String description;

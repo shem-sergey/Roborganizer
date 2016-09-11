@@ -34,12 +34,21 @@ public class Roborganizer {
         if (orgCalendar == null) {
             orgCalendar = new OrgCalendar();
         }
-        performTask(OrgTask.getTask(args[0]), orgCalendar);
+        boolean cont = performTask(OrgTask.getTask(args[0]), orgCalendar);
+
+        while (cont) {
+            System.out.println("Enter task to perform:");
+            OrgTask task = readTask();
+            while (task == OrgTask.ERROR) {
+                task = readTask();
+            }
+            cont = performTask(task, orgCalendar);
+        }
 
         Serializer.writeToFile(orgCalendar);    // LEAVE TO BE THE LAST LINE!
     }
 
-    static void performTask(OrgTask task, OrgCalendar orgCalendar) {
+    static boolean performTask(OrgTask task, OrgCalendar orgCalendar) {
         switch (task) {
             case PRINT_SHORT_CALENDAR:
                 System.out.println("Enter month to print:");
@@ -64,11 +73,16 @@ public class Roborganizer {
                 addPatternedEvent(orgCalendar);
                 break;
             case UPDATE_STATUS:
-                //TODO
+                OrgEvent event = readOrgEvent(orgCalendar);
+                event.setEventStatus(readEventStatus());
                 break;
+            case EXIT:
+                return false;
             default:
                 System.out.println("Sorry, this functionality is not added yet.");
+                return false;
         }
+        return true;
     }
 
     static void addSinglEvent(OrgCalendar orgCalendar) {

@@ -357,6 +357,15 @@ public class OrgDay {
         return res;
     }
 
+    public boolean containsOrgEvent(OrgEvent event) {
+        for(OrgEvent e : events) {
+            if(e.equals(event)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public class OrgDayTotal {
         private int valueOfPlanned;
         private int valueOfCompleted;
