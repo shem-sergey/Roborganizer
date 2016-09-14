@@ -331,7 +331,7 @@ public class Readers {
         System.out.println("Choose event by number:");
         int eventNum = readInteger();
         OrgDay day = orgCalendar.getOrgDay(date);
-        if(day.getEvents().size() > eventNum) {
+        if(day.getEvents().size() < eventNum) {
             System.out.println("Sorry, try again");
             return readOrgEvent(orgCalendar);
         } else {

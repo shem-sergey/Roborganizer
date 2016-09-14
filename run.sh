@@ -1,1 +1,1 @@
-java -cp target roborganizer.cli.Roborganizer
+java -cp target roborganizer.cli.Roborganizer $*
